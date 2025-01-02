@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Église - Statistiques</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .stat {
+            margin: 20px 0;
+            padding: 15px;
+            background: #eafaf1;
+            border-radius: 5px;
+            font-size: 1.5rem;
+        }
+        .stat span {
+            font-weight: bold;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Statistiques de l'Église</h1>
+
+        <div class="stat">
+            <span id="souls">0</span> âmes gagnées
+        </div>
+
+        <div class="stat">
+            <span id="newcomers">0</span> nouveaux participants
+        </div>
+
+        <footer>
+            Dernière mise à jour : <span id="lastUpdated">--/--/----</span>
+        </footer>
+    </div>
+
+    <script>
+        // Lien public de ton Google Sheet (converti en CSV)
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/1nj_axABlemhZd_XEc4ZhNhZUhP2ZJw68ONldXXkqXwU/gviz/tq?tqx=out:csv&sheet=Sheet1";
+
+        // Fonction pour récupérer les données du Google Sheet
+        function fetchSheetData() {
+            fetch(sheetUrl)
+                .then(response => response.text())
+                .then(csvData => processCSVData(csvData))
+                .catch(error => console.error('Erreur de récupération des données:', error));
+        }
+
+        // Fonction pour traiter les données CSV
+        function processCSVData(csvData) {
+            const rows = csvData.split('\n');
+            
+            // Ignorer la première ligne (headers) et traiter les données à partir de la deuxième ligne
+            if (rows.length > 1) {
+                const secondRow = rows[1].split(',');
+
+                // Extraction des colonnes Date, Âmes gagnées et Nouveaux
+                const dateIndex = 0; // Index de "Date"
+                const soulsIndex = 1; // Index de "Âmes gagnées"
+                const newcomersIndex = 2; // Index de "Nouveaux"
+
+                document.getElementById('souls').innerText = secondRow[soulsIndex] || 0;
+                document.getElementById('newcomers').innerText = secondRow[newcomersIndex] || 0;
+                document.getElementById('lastUpdated').innerText = secondRow[dateIndex] || "--/--/----";
+            } else {
+                console.error('Pas de données disponibles après la ligne d'en-tête.');
+            }
+        }
+
+        // Initialiser la récupération des données au chargement de la page
+        window.onload = fetchSheetData;
+    </script>
+</body>
+</html>

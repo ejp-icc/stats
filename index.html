@@ -5,9 +5,9 @@
 </head>
 <body>
     <h1>Statistiques de l'Église</h1>
-    <div id="stats">
-        Chargement des données...
-    </div>
+    <p><strong>Âmes gagnées :</strong> <span id="amesGagnees">0</span></p>
+    <p><strong>Nouveaux :</strong> <span id="nouveaux">0</span></p>
+    <p><strong>Date de mise à jour :</strong> <span id="dateMaj">N/A</span></p>
 
     <script>
         // Ta clé API Google
@@ -24,25 +24,14 @@
             .then(data => {
                 console.log(data); // Debug : afficher les données dans la console
 
-                // Vérifier si les données existent
                 if (data.values) {
                     const rows = data.values; // Récupérer les lignes
-                    let htmlContent = "<table border='1'><tr><th>Date</th><th>Âmes gagnées</th><th>Nouveaux</th></tr>";
+                    const lastRow = rows[rows.length - 1]; // Dernière ligne de données
 
-                    // Parcourir les lignes et ajouter les données dans le tableau
-                    rows.forEach((row, index) => {
-                        if (index > 0) { // Ignorer la première ligne (en-têtes)
-                            htmlContent += `
-                                <tr>
-                                    <td>${row[0] || ""}</td>
-                                    <td>${row[1] || 0}</td>
-                                    <td>${row[2] || 0}</td>
-                                </tr>`;
-                        }
-                    });
-
-                    htmlContent += "</table>";
-                    document.getElementById("stats").innerHTML = htmlContent;
+                    // Mettre à jour les valeurs dans l'interface
+                    document.getElementById("amesGagnees").innerText = lastRow[1] || 0;
+                    document.getElementById("nouveaux").innerText = lastRow[2] || 0;
+                    document.getElementById("dateMaj").innerText = lastRow[0] || "N/A";
                 } else {
                     document.getElementById("stats").innerText = "Aucune donnée trouvée dans le Google Sheet.";
                 }

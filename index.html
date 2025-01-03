@@ -1,99 +1,56 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Église - Statistiques</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-            text-align: center;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #4CAF50;
-        }
-        .stat {
-            margin: 20px 0;
-            padding: 15px;
-            background: #eafaf1;
-            border-radius: 5px;
-            font-size: 1.5rem;
-        }
-        .stat span {
-            font-weight: bold;
-        }
-        footer {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-    </style>
+    <title>Statistiques de l'Église</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Statistiques de l'Église</h1>
-
-        <div class="stat">
-            <span id="souls">0</span> âmes gagnées
-        </div>
-
-        <div class="stat">
-            <span id="newcomers">0</span> nouveaux participants
-        </div>
-
-        <footer>
-            Dernière mise à jour : <span id="lastUpdated">--/--/----</span>
-        </footer>
+    <h1>Statistiques de l'Église</h1>
+    <div id="stats">
+        Chargement des données...
     </div>
 
     <script>
-        // Lien public de ton Google Sheet (converti en CSV)
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/1nj_axABlemhZd_XEc4ZhNhZUhP2ZJw68ONldXXkqXwU/gviz/tq?tqx=out:csv&sheet=Sheet1";
+        // Ta clé API Google
+        const apiKey = "AIzaSyCw_DkDxDzfbfuWdp4czAzp1MkNUPGbHDk";
+        const spreadsheetId = "1nj_axABlemhZd_XEc4ZhNhZUhP2ZJw68ONldXXkqXwU"; // ID de ton Google Sheet
+        const range = "Sheet1!A:D"; // Plage des données (Date, Âmes gagnées, Nouveaux, Remarques)
+
+        // Construire l'URL de l'API
+        const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?key=${apiKey}`;
 
         // Fonction pour récupérer les données du Google Sheet
-        function fetchSheetData() {
-            fetch(sheetUrl)
-                .then(response => response.text())
-                .then(csvData => processCSVData(csvData))
-                .catch(error => console.error('Erreur de récupération des données:', error));
-        }
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Debug : afficher les données dans la console
 
-        // Fonction pour traiter les données CSV
-        function processCSVData(csvData) {
-            const rows = csvData.split('\n');
-            
-            // Ignorer la première ligne (headers) et traiter les données à partir de la deuxième ligne
-            if (rows.length > 1) {
-                const secondRow = rows[1].split(',');
+                // Vérifier si les données existent
+                if (data.values) {
+                    const rows = data.values; // Récupérer les lignes
+                    let htmlContent = "<table border='1'><tr><th>Date</th><th>Âmes gagnées</th><th>Nouveaux</th></tr>";
 
-                // Extraction des colonnes Date, Âmes gagnées et Nouveaux
-                const dateIndex = 0; // Index de "Date"
-                const soulsIndex = 1; // Index de "Âmes gagnées"
-                const newcomersIndex = 2; // Index de "Nouveaux"
+                    // Parcourir les lignes et ajouter les données dans le tableau
+                    rows.forEach((row, index) => {
+                        if (index > 0) { // Ignorer la première ligne (en-têtes)
+                            htmlContent += `
+                                <tr>
+                                    <td>${row[0] || ""}</td>
+                                    <td>${row[1] || 0}</td>
+                                    <td>${row[2] || 0}</td>
+                                </tr>`;
+                        }
+                    });
 
-                document.getElementById('souls').innerText = secondRow[soulsIndex] || 0;
-                document.getElementById('newcomers').innerText = secondRow[newcomersIndex] || 0;
-                document.getElementById('lastUpdated').innerText = secondRow[dateIndex] || "--/--/----";
-            } else {
-                console.error('Pas de données disponibles après la ligne d'en-tête.');
-            }
-        }
-
-        // Initialiser la récupération des données au chargement de la page
-        window.onload = fetchSheetData;
+                    htmlContent += "</table>";
+                    document.getElementById("stats").innerHTML = htmlContent;
+                } else {
+                    document.getElementById("stats").innerText = "Aucune donnée trouvée dans le Google Sheet.";
+                }
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des données :", error);
+                document.getElementById("stats").innerText = "Impossible de charger les données.";
+            });
     </script>
 </body>
 </html>
